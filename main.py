@@ -21,10 +21,6 @@ AMARELO = (255, 255, 0)
 PRETO = (0, 0, 0)
 AZUL = (0, 0, 255)
 BRANCO = (255, 255, 255)
-VERMELHO = (255, 0, 0)
-LARANJA = (255, 140, 0)
-ROSA = (255, 15, 192)
-CIANO = (0, 255, 255)
 CINZA = (100, 100, 100)
 
 tela = pygame.display.set_mode((COMPRIMENTO_TELA, LARGURA_TELA))
@@ -65,10 +61,10 @@ class Bola(ElementoDoJogo):
     def escolher_direcao(self):
         escolha = choice((1, 2, 3))
         if escolha == 1:
-            self.velocidadeY = 1
+            self.velocidadeY = self.VELOCIDADE
 
         elif escolha == 2:
-            self.velocidadeY = -1
+            self.velocidadeY = -self.VELOCIDADE
 
         else:
             self.velocidadeY = 0
@@ -98,6 +94,9 @@ class Cenario(ElementoDoJogo):
         pass
 
     def calcular_regra_jogando(self):
+        if (self.batida==5):
+            self.batida = 0
+            self.bola.VELOCIDADE += 1
         for movivel in self.lista_objetos:
             if (isinstance(movivel, Jogador_Humano)):
                 ## testa hitbox na direita
@@ -107,7 +106,7 @@ class Cenario(ElementoDoJogo):
                         bola.velocidadeX = -1
                         bola.escolher_direcao()
                         self.batida += 1
-                        bola.velocidadeY = bola.VELOCIDADE
+
                 ## Testa hitbox na esquerda
                 elif self.bola.posicaoX - self.bola.raio == movivel.posicaoX + movivel.comprimento:
                     if movivel.posicaoY + movivel.altura >= self.bola.posicaoY + self.bola.raio >= movivel.posicaoY or \
@@ -115,27 +114,27 @@ class Cenario(ElementoDoJogo):
                         bola.velocidadeX = 1
                         bola.escolher_direcao()
                         self.batida += 1
-                        bola.velocidadeY = bola.VELOCIDADE
+
             if (isinstance(movivel, Bola)):
 
                 if movivel.posicaoY<=0:## Testa se a bola bateu no teto
                     movivel.velocidadeY = movivel.VELOCIDADE
+                    self.batida += 1
                 elif movivel.posicaoY >= LARGURA_TELA: ## Testa se a bola bateu no chao
                     movivel.velocidadeY = -movivel.VELOCIDADE
+                    self.batida += 1
                 if movivel.posicaoX < 0 or movivel.posicaoX > COMPRIMENTO_TELA: ## testa se a bola passou por um dos lados
                     self.bola.VELOCIDADE = 1
                     self.batida = 0
                     if movivel.posicaoX <= 0:
-                        movivel.velocidadeX = movivel.VELOCIDADE
+                        movivel.velocidadeX = 1
                         self.player2_pontos += 1
                     elif movivel.posicaoX >= COMPRIMENTO_TELA:
-                        movivel.velocidadeX = -movivel.VELOCIDADE
+                        movivel.velocidadeX = -1
                         self.player1_pontos += 1
                     movivel.posicaoX, movivel.posicaoY = COMPRIMENTO_TELA//2-self.comprimento, LARGURA_TELA//2
                     movivel.velocidadeY = 0
-            if (self.batida==5):
-                self.batida = 0
-                self.bola.VELOCIDADE += 1
+
             movivel.calcular_regra()
 
     def processar_eventos(self, eventos):
@@ -233,6 +232,7 @@ if __name__ == "__main__":
 
         #Calcular Regras do jogo
         cenario.calcular_regra()
+        print(cenario.batida)
 
         #Pintar tela
         tela.fill(PRETO)
