@@ -18,3 +18,5 @@ Seta para baixo: Descer
 ```
 Enter: Pausa
 ```
+## Atenção
+É necessário a biblioteca pygame
